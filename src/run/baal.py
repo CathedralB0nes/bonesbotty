@@ -398,42 +398,7 @@ class Baal:
             pos_m = self._screen.convert_screen_to_monitor(self._template_finder.search_and_wait(["RED_GOOP_PURPLE3", "RED_GOOP_PURPLE4", "RED_GOOP_PURPLE6", "RED_GOOP_PURPLE5"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).position)
             keyboard.send(self._config.char["minimap"]) #turn off minimap
             self._exitclicker(pos_m)
-            return True
-
-            
-    # def _to_throne(self)-> bool:
-    #     Logger.debug("TO THRONE")
-    #     #do_pre_buff: bool
-    #     # if do_pre_buff: self._char.pre_buff()   
-          # keyboard.send(self._char._skill_hotkeys["teleport"]) #switch active skill to teleport
-          # keyboard.send(self._config.char["minimap"]) #turn on minimap
-    #     #setting up variables
-    #     found = False
-    #     corner_picker = 3 #we start searching towards the top, as often the cold plains entrance is at the bottom of the map
-    #     corner_exclude = 3
-    #     exclude1 = corner_picker - 2
-    #     exclude2 = corner_picker + 2 
-    #     stuck_count = 0
-    #     super_stuck = 0
-    #     keepernumber = 0
-    #     dinky = 0
-    #     #lets start the search
-    #     while not found:
-    #         Logger.debug(str(corner_picker) + ": is our selected corner.")   
-    #         found = self._template_finder.search_and_wait(["RED_GOOP_PURPLE3", "RED_GOOP_PURPLE4", "RED_GOOP_PURPLE6", "BAAL_LVL2_4", "BAAL_LVL2_5", "BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], best_match=True, threshold=0.7, time_out=0.1, use_grayscale=False).valid
-    #         if corner_picker == 1:
-    #             self._scout(1, -250, -600, -200, -345, stuck_count, super_stuck, corner_exclude, exclude1, exclude2, keepernumber) #top - left
-    #             dinky += 1
-    #         elif corner_picker == 2:
-    #             self._scout(2, 250, 600, -200, -345, stuck_count, super_stuck, corner_exclude, exclude1, exclude2, keepernumber) # top - right
-    #             dinky += 1
-    #         elif corner_picker == 3:
-    #             self._scout(3, 250, 600, 200, 345, stuck_count, super_stuck, corner_exclude, exclude1, exclude2, keepernumber) # bottom - right
-    #             dinky += 1
-    #         elif corner_picker == 4:
-    #             self._scout(4, -250, -600, 200, 345, stuck_count, super_stuck, corner_exclude, exclude1, exclude2, keepernumber) # bottom - left
-    #             dinky += 1
-   
+            return True   
 
     def _exitclicker(self, pos_m)-> bool:
             Logger.debug("EXITCLICKER")
@@ -478,6 +443,9 @@ class Baal:
                     if super_stuck >= 3:
                         Logger.debug("SUPER DUPER STUCK")
                         self.exit_super_stuck(pos_m, stuck_count, super_stuck, roomfound)
+                        if self._template_finder.search_and_wait(["MAP_CHECK"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).valid:
+                            keyboard.send(self._char._skill_hotkeys["teleport"]) #switch active skill to teleport
+                            Logger.debug("EXIT CLICKER SUPER STUCK /// MAP OFF")
                         super_stuck = 0
                         stuck_count = 0
             Logger.debug("FOUND EXIT")
