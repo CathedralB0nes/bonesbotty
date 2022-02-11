@@ -365,31 +365,34 @@ class Baal:
             keyboard.send(self._config.char["minimap"]) #turn on minimap
             Logger.debug("SCOUT /// MAP ON")
         while not found:
-                (self, corner_picker, x1_m, x2_m, y1_m, y2_m, stuck_count, super_stuck, corner_exclude, exclude1, exclude2, keepernumber) = (self, corner_picker, x1_m, x2_m, y1_m, y2_m, stuck_count, super_stuck, corner_exclude, exclude1, exclude2, keepernumber)
-                found = self._template_finder.search_and_wait(["RED_GOOP_PURPLE3", "RED_GOOP_PURPLE4", "RED_GOOP_PURPLE6", "RED_GOOP_PURPLE5"], best_match=True, threshold=0.9, time_out=0.1, use_grayscale=False).valid
-                founder = self._template_finder.search_and_wait(["RED_GOOP_PURPLE3", "RED_GOOP_PURPLE4", "RED_GOOP_PURPLE6", "RED_GOOP_PURPLE5"], best_match=True, threshold=0.9, time_out=0.1, use_grayscale=False)
-                foundname = founder.name
-                if founder.valid:
-                    pos_m = self._screen.convert_screen_to_monitor(founder.position)
-                # Logger.debug("EXIT CLICKER 1st FIND/// MAP OFF")
-                pos_m = self._screen.convert_abs_to_monitor((random.uniform(x1_m, x2_m), random.uniform(y1_m, y2_m)))
-                t0 = self._screen.grab()
-                self._char.move(pos_m, force_tp=True, force_move=True)
-                t1 = self._screen.grab()
-                diff = cv2.absdiff(t0, t1)
-                diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-                _, mask = cv2.threshold(diff, 13, 255, cv2.THRESH_BINARY)
-                score = (float(np.sum(mask)) / mask.size) * (1/255.0)
-                Logger.debug(str(score) + ": is our current score")
-                if score < .10:
-                    stuck_count += 1
-                    if stuck_count >= 2:
-                        super_stuck += 1
-                        self.stuck(corner_picker, x2_m, y2_m, stuck_count, super_stuck, pos_m)
-                        stuck_count = 0  
-                    if super_stuck >= 3:
-                        self.super_stuck(corner_picker, x1_m, x2_m, y1_m, y2_m, stuck_count, super_stuck, corner_exclude, exclude1, exclude2, keepernumber)
-                        super_stuck = 0                                  
+            (self, corner_picker, x1_m, x2_m, y1_m, y2_m, stuck_count, super_stuck, corner_exclude, exclude1, exclude2, keepernumber) = (self, corner_picker, x1_m, x2_m, y1_m, y2_m, stuck_count, super_stuck, corner_exclude, exclude1, exclude2, keepernumber)
+            found = self._template_finder.search_and_wait(["RED_GOOP_PURPLE3", "RED_GOOP_PURPLE4", "RED_GOOP_PURPLE6", "RED_GOOP_PURPLE5"], best_match=True, threshold=0.9, time_out=0.1, use_grayscale=False).valid
+            founder = self._template_finder.search_and_wait(["RED_GOOP_PURPLE3", "RED_GOOP_PURPLE4", "RED_GOOP_PURPLE6", "RED_GOOP_PURPLE5"], best_match=True, threshold=0.9, time_out=0.1, use_grayscale=False)
+            foundname = founder.name
+            if founder.valid:
+                pos_m = self._screen.convert_screen_to_monitor(founder.position)
+            # Logger.debug("EXIT CLICKER 1st FIND/// MAP OFF")
+            pos_m = self._screen.convert_abs_to_monitor((random.uniform(x1_m, x2_m), random.uniform(y1_m, y2_m)))
+            t0 = self._screen.grab()
+            self._char.move(pos_m, force_tp=True, force_move=True)
+            t1 = self._screen.grab()
+            diff = cv2.absdiff(t0, t1)
+            diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+            _, mask = cv2.threshold(diff, 13, 255, cv2.THRESH_BINARY)
+            score = (float(np.sum(mask)) / mask.size) * (1/255.0)
+            Logger.debug(str(score) + ": is our current score")
+            if self._template_finder.search_and_wait(["BAAL_LVL2_4", "BAAL_LVL2_5", "BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], best_match=True, threshold=0.7,  time_out=0.1, use_grayscale=False).valid:
+                pos_m = (0, 0)
+                self._exitclicker(pos_m)
+            if score < .10:
+                stuck_count += 1
+                if stuck_count >= 2:
+                    super_stuck += 1
+                    self.stuck(corner_picker, x2_m, y2_m, stuck_count, super_stuck, pos_m)
+                    stuck_count = 0  
+                if super_stuck >= 3:
+                    self.super_stuck(corner_picker, x1_m, x2_m, y1_m, y2_m, stuck_count, super_stuck, corner_exclude, exclude1, exclude2, keepernumber)
+                    super_stuck = 0                                  
                                             
         if found == True:
             Logger.debug("SCOUT EXITING oustside")
@@ -423,6 +426,7 @@ class Baal:
                 if roomfound == True or template_match.valid:
                     if self._template_finder.search_and_wait(["MAP_CHECK"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).valid:
                         keyboard.send(self._char._skill_hotkeys["teleport"]) #switch active skill to teleport
+                        keyboard.send(self._config.char["minimap"]) #turn on minimap
                         Logger.debug("EXIT CLICKER MATCH AND MAP MATCH /// MAP OFF")
                         if self._template_finder.search_and_wait(["RED_GOOP_PURPLE3", "RED_GOOP_PURPLE4", "RED_GOOP_PURPLE6", "RED_GOOP_PURPLE5"], best_match=True, threshold=0.9,  time_out=0.1, use_grayscale=False) == True:
                             pos_m = self._screen.convert_screen_to_monitor(template_match.position)
@@ -445,6 +449,7 @@ class Baal:
                         self.exit_super_stuck(pos_m, stuck_count, super_stuck, roomfound)
                         if self._template_finder.search_and_wait(["MAP_CHECK"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).valid:
                             keyboard.send(self._char._skill_hotkeys["teleport"]) #switch active skill to teleport
+                            keyboard.send(self._config.char["minimap"]) #turn on minimap
                             Logger.debug("EXIT CLICKER SUPER STUCK /// MAP OFF")
                         super_stuck = 0
                         stuck_count = 0
@@ -552,7 +557,7 @@ class Baal:
         clearpath = False
         found_loading_screen_func = lambda: self._ui_manager.wait_for_loading_screen(2.0)
         laughcount = 0
-        while not self._template_finder.search_and_wait(["BAAL_THRONE_ROOM_CLEAR", "BAAL_THRONE_ROOM_CLEAR_1", "BAAL_THRONE_ROOM_CLEAR_2"], best_match=True, threshold=0.7, time_out=0.1, use_grayscale=False).valid:
+        while not self._template_finder.search_and_wait(["BAAL_THRONE_ROOM_CLEAR", "BAAL_THRONE_ROOM_CLEAR_1", "BAAL_THRONE_ROOM_CLEAR_2"], best_match=True, threshold=0.7, time_out=0.1, use_grayscale=False).valid or self._template_finder.search_and_wait(["BAAL_THRONE_ROOM_7"], best_match=True, threshold=0.9, time_out=0.1, use_grayscale=False).valid:
             Logger.debug("LAUGH COUNT :")
             Logger.debug(laughcount)
             if self._template_finder.search_and_wait(["LAUGHING"], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False).valid:                
@@ -607,7 +612,7 @@ class Baal:
                         self._pather.traverse_nodes([9000], self._char, time_out=3)
                         corner_count += 1
         self._pather.traverse_nodes([9000], self._char, time_out=3)
-        if self._template_finder.search_and_wait(["BAAL_THRONE_ROOM_CLEAR", "BAAL_THRONE_ROOM_CLEAR_1", "BAAL_THRONE_ROOM_CLEAR_2"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).valid:
+        if self._template_finder.search_and_wait(["BAAL_THRONE_ROOM_CLEAR", "BAAL_THRONE_ROOM_CLEAR_1", "BAAL_THRONE_ROOM_CLEAR_2"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).valid or self._template_finder.search_and_wait(["BAAL_THRONE_ROOM_7"], best_match=True, threshold=0.9, time_out=0.1, use_grayscale=False).valid:
             Logger.debug("NO BAALDUDE //// CLICKING EXIT")
             self._picked_up_items |= self._pickit.pick_up_items(self._char)
             if not self._pather.traverse_nodes([9004], self._char, time_out=3):
