@@ -180,7 +180,6 @@ class Baal:
                 pos_m2 = self._screen.convert_abs_to_monitor((600, -350))
                 self._char.move(pos_m2, force_tp=True)
             super_stuck += 1
-            stuck_count = 0
         if x > 0 and y < 0 and not roomfound: #corner 2
             Logger.debug("corner two stuck")
             t0 = self._screen.grab()                      
@@ -196,7 +195,6 @@ class Baal:
                 pos_m2 = self._screen.convert_abs_to_monitor((600, 350))
                 self._char.move(pos_m2, force_tp=True)
             super_stuck += 1
-            stuck_count = 0
         if x > 0 and y > 0 and not roomfound: #corner 3
             Logger.debug("corner three stuck")
             t0 = self._screen.grab()                      
@@ -212,7 +210,6 @@ class Baal:
                 pos_m2 = self._screen.convert_abs_to_monitor((-600, 350))
                 self._char.move(pos_m2, force_tp=True)
             super_stuck += 1
-            stuck_count = 0
         if x < 0 and y > 0 and not roomfound: #corner 4
             Logger.debug("corner four stuck")
             t0 = self._screen.grab()                      
@@ -228,7 +225,6 @@ class Baal:
                 pos_m2 = self._screen.convert_abs_to_monitor((-600, 350))
                 self._char.move(pos_m2, force_tp=True)
             super_stuck += 1
-            stuck_count = 0
 
     def _corner_roller(self, corner_picker, x1_m, x2_m, y1_m, y2_m, stuck_count, super_stuck, corner_exclude, exclude1, exclude2, keepernumber)-> bool:
             keepernumber = random.randint(1, 4)
@@ -275,15 +271,17 @@ class Baal:
                 Logger.debug(str(score) + ": is our current score")
                 self._char.move(pos_m, force_tp=True, force_move=True)
                 if score < .10:
+                    if super_stuck >= 2:
+                            self.super_stuck(corner_picker, x1_m, x2_m, y1_m, y2_m, stuck_count, super_stuck, corner_exclude, exclude1, exclude2, keepernumber)
                     stuck_count += 1               
                     if stuck_count >=2:
-                        self.stuck(self, corner_picker, x2_m, y2_m, stuck_count, super_stuck)                         
-                        if super_stuck >= 2:
-                            self.super_stuck(self, corner_picker, x1_m, x2_m, y1_m, y2_m, stuck_count, super_stuck, corner_exclude, exclude1, exclude2, keepernumber) 
+                        self.stuck(corner_picker, x2_m, y2_m, stuck_count, super_stuck)                         
         if found == True:
             Logger.debug("SCOUT EXITING oustside")
             Logger.debug(foundname)
             Logger.debug(founder.score)
+            pos_m = self._screen.convert_screen_to_monitor(self._template_finder.search_and_wait(["RED_GOOP_PURPLE3", "RED_GOOP_PURPLE4", "RED_GOOP_PURPLE6"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).position)
+            keyboard.send(self._config.char["minimap"]) #turn off minimap
             self._exitclicker(pos_m)
 
             
@@ -328,7 +326,7 @@ class Baal:
             super_stuck = 0
             mapcheck = self._template_finder.search_and_wait(["MAP_CHECK"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False)
             template_match = self._template_finder.search_and_wait(["RED_GOOP_PURPLE3", "RED_GOOP_PURPLE4", "RED_GOOP_PURPLE6"], best_match=True, threshold=0.9,  time_out=0.1, use_grayscale=False)
-            if template_match.valid and mapcheck.valid:
+            if template_match.valid:
                 pos_m = self._screen.convert_screen_to_monitor(template_match.position)
                 if self._template_finder.search_and_wait(["MAP_CHECK"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).valid:
                     Logger.debug("EXITCLICKER FOUND TEMPLATE TURNING MAP OFF!")
@@ -336,12 +334,14 @@ class Baal:
                     keyboard.send(self._config.char["minimap"]) #turn on minimap
                     # Logger.debug("EXIT CLICKER 1st FIND/// MAP OFF")
             while not roomfound:
+                founder = self._template_finder.search_and_wait(["RED_GOOP_PURPLE3", "RED_GOOP_PURPLE4", "RED_GOOP_PURPLE6"], best_match=True, threshold=0.9,  time_out=0.1, use_grayscale=False)
+                if founder.valid:
+                    pos_m = self._screen.convert_screen_to_monitor(founder.position)                
                 roomfound = self._template_finder.search_and_wait(["BAAL_LVL2_4", "BAAL_LVL2_5", "BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], best_match=True, threshold=0.7,  time_out=0.1, use_grayscale=False).valid
                 template_match = self._template_finder.search_and_wait(["RED_GOOP_PURPLE3", "RED_GOOP_PURPLE4", "RED_GOOP_PURPLE6"], best_match=True, threshold=0.9,  time_out=0.1, use_grayscale=False)
-                if roomfound == True or template_match == True:
+                if roomfound == True or template_match.valid:
                     if self._template_finder.search_and_wait(["MAP_CHECK"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).valid:
                         keyboard.send(self._char._skill_hotkeys["teleport"]) #switch active skill to teleport
-                        keyboard.send(self._config.char["minimap"]) #turn on minimap
                         Logger.debug("EXIT CLICKER MATCH AND MAP MATCH /// MAP OFF")
                         if self._template_finder.search_and_wait(["RED_GOOP_PURPLE3", "RED_GOOP_PURPLE4", "RED_GOOP_PURPLE6"], best_match=True, threshold=0.9,  time_out=0.1, use_grayscale=False) == True:
                             pos_m = self._screen.convert_screen_to_monitor(template_match.position)
@@ -354,16 +354,15 @@ class Baal:
                 diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
                 _, mask = cv2.threshold(diff, 13, 255, cv2.THRESH_BINARY)
                 score = (float(np.sum(mask)) / mask.size) * (1/255.0)
-                super_stuck = 0
                 self._char.move(pos_m, force_tp=True, force_move=True)
                 self._char.move(pos_m, force_tp=True, force_move=True)
                 self._char.move(pos_m, force_tp=True, force_move=True)              
                 if score < .15 and not roomfound:
                     stuck_count += 1
-                    if stuck_count >= 2 and super_stuck < 2 and not roomfound:
+                    if stuck_count >= 2:
                         super_stuck += 1
-                        self.exit_stuck(pos_m, stuck_count, super_stuck, roomfound) 
-                    elif super_stuck >= 3 and not roomfound:
+                        self.exit_stuck(pos_m, stuck_count, super_stuck, roomfound)
+                    if super_stuck >= 3:
                         Logger.debug("SUPER DUPER STUCK")
                         self.exit_super_stuck(pos_m, stuck_count, super_stuck, roomfound)
             Logger.debug("FOUND EXIT")
@@ -384,25 +383,23 @@ class Baal:
                             return False
             if not self._template_finder.search_and_wait(["BAAL_THRONE_START_0", "BAAL_THRONE_START_1", "BAAL_THRONE_START_2", "BAAL_THRONE_START_3"], threshold=0.8, time_out=.5).valid:
                 if not self._template_finder.search_and_wait(["BAAL_THRONE_START_0", "BAAL_THRONE_START_1", "BAAL_THRONE_START_2", "BAAL_THRONE_START_3"], threshold=0.8, time_out=1).valid:
-                    self._scout(4, -250, -600, 200, 345, 0, 0, 4, 2, 2, 4) # bottom - left
+                    keyboard.send(self._config.char["minimap"]) #turn off minimap
+                    self._scout(4, -485, -600, 200, 345, 0, 0, 4, 2, 2, 4) # bottom - left
             else:
                 #throne killd
-                keyboard.send(self._char._skill_hotkeys["teleport"]) #switch active skill to teleport
-                keyboard.send(self._config.char["minimap"]) #turn on minimap
+                keyboard.send(self._char._skill_hotkeys["teleport"]) #switch active skill to teleport                
                 self._throne_room()
 
     def _throne_room(self)-> bool:
+        self._char.pre_buff()
+        keyboard.send(self._char._skill_hotkeys["teleport"]) #switch active skill to teleport
         Logger.debug("TO MONSTERIN THRONE")
         if not self._template_finder.search_and_wait(["MAP_CHECK"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).valid:
             Logger.debug("MAP IS OFF! DO THRONE!")
         else:
             Logger.debug("MAP IS ON TURNING OFF! DO THRONE!")
             keyboard.send(self._config.char["minimap"]) #turn on minimap
-        
-        # Cthu: instead of looping to the throne, we just use a static path that ends close to [9000]. The coordinates for the static path are defined in GAME.INI & are called with the function below. You can record your own static paths using utils/static_run_recorder.py -> press F11 and right click where you want to record the x,y of the click to the terminal.
-        if not self._pather.traverse_nodes_fixed("baal_lvl3entrance_throne", self._char): return False #we wrap it around an if block returning false, when it was not successful, to stop the run. 
-        if not self._pather.traverse_nodes([9000], self._char, time_out=3, threshold=0.8): return False
-        """
+
         roomfound = False
         while not roomfound:
             roomfound = self._template_finder.search_and_wait(["BAAL_THRONE_ROOM_0", "BAAL_THRONE_ROOM_7", "BAAL_THRONE_ROOM_2", "BAAL_THRONE_ROOM_3", "BAAL_THRONE_ROOM_4", "BAAL_THRONE_ROOM_5", "BAAL_THRONE_ROOM_6"], best_match=True, threshold=0.8,  time_out=0.1, use_grayscale=False).valid
@@ -414,14 +411,19 @@ class Baal:
             # do a random tele jump and try again
             pos_m = self._screen.convert_abs_to_monitor((250, 220))
             self._char.move(pos_m, force_move=True)
-        """  
+        
+        # Cthu: instead of looping to the throne, we just use a static path that ends close to [9000]. The coordinates for the static path are defined in GAME.INI & are called with the function below. You can record your own static paths using utils/static_run_recorder.py -> press F11 and right click where you want to record the x,y of the click to the terminal.
+        #if not self._pather.traverse_nodes_fixed("baal_lvl3entrance_throne", self._char): return False #we wrap it around an if block returning false, when it was not successful, to stop the run. 
+        if not self._pather.traverse_nodes([9000], self._char, time_out=3, threshold=0.8): return False
+
+
+
         Logger.debug("MINI TRASH")
         corner_count = 0
         while not self._template_finder.search_and_wait(["LAUGHING"], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False).valid:
-            self._pather.traverse_nodes([9000], self._char, time_out=3)
             if self._template_finder.search_and_wait(["LAUGHING"], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False).valid:
                 break
-            if corner_count > 4:
+            if corner_count < 5:
                 if corner_count == 0: #by entrance
                     Logger.debug("MINI ENTRANCE")
                     pos_m = self._screen.convert_abs_to_monitor((-350, 220))
@@ -431,35 +433,35 @@ class Baal:
                     corner_count += 1
                 elif corner_count == 1: #top left
                     Logger.debug("MINI TOP LEFT")
-                    pos_m = self._screen.convert_abs_to_monitor((-400, 330))
+                    pos_m = self._screen.convert_abs_to_monitor((-400, -330))
                     self._char.move(pos_m, force_tp=True)        
                     self._char._mini_trash()
                     self._pather.traverse_nodes([9000], self._char, time_out=3)
                     corner_count += 1
                 elif corner_count == 2: #top right
                     Logger.debug("MINI TOP RIGHT")
-                    pos_m = self._screen.convert_abs_to_monitor((450, -200))
+                    pos_m = self._screen.convert_abs_to_monitor((450, -340))
                     self._char.move(pos_m, force_tp=True)    
                     self._char._mini_trash()
-                    pos_m = self._screen.convert_abs_to_monitor((450, 200))
+                    pos_m = self._screen.convert_abs_to_monitor((450, 340))
                     self._char.move(pos_m, force_tp=True)
                     self._pather.traverse_nodes([9000], self._char, time_out=3)
                     corner_count += 1
                 elif corner_count == 3: # bottom right
                     Logger.debug("MINI BOT RIGHT")
-                    pos_m = self._screen.convert_abs_to_monitor((485, 10))
+                    pos_m = self._screen.convert_abs_to_monitor((485, 330))
                     self._char.move(pos_m, force_tp=True)        
                     self._char._mini_trash()
-                    pos_m = self._screen.convert_abs_to_monitor((-485, -100))
+                    pos_m = self._screen.convert_abs_to_monitor((-485, -330))
                     self._char.move(pos_m, force_tp=True)
                     self._pather.traverse_nodes([9000], self._char, time_out=3)
                     corner_count += 1
                 elif corner_count == 3: # bottom left
                     Logger.debug("MINI BOT LEFT")
-                    pos_m = self._screen.convert_abs_to_monitor((-485, 10))
+                    pos_m = self._screen.convert_abs_to_monitor((-485, 330))
                     self._char.move(pos_m, force_tp=True)        
                     self._char._mini_trash()
-                    pos_m = self._screen.convert_abs_to_monitor((485, -100))
+                    pos_m = self._screen.convert_abs_to_monitor((485, -330))
                     self._char.move(pos_m, force_tp=True)
                     self._pather.traverse_nodes([9000], self._char, time_out=3)
                     corner_count += 1
@@ -470,27 +472,31 @@ class Baal:
             pos_m = self._screen.convert_abs_to_monitor((250, 220))
             self._char.move(pos_m, force_move=True)
         Logger.debug("WAITING FOR LAUGH?")
-        baaldude = True
+        clearpath = False
         found_loading_screen_func = lambda: self._ui_manager.wait_for_loading_screen(2.0)
         laughcount = 0
         while laughcount < 8:
             Logger.debug("LAUGH COUNT :")
             Logger.debug(laughcount)
-            baaldude = self._template_finder.search_and_wait(["BAAL_HIMSELF", "BAAL_HIMSELF3"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).valid or self._template_finder.search_and_wait(["BAAL_HIMSELF2"], best_match=True, threshold=0.6, time_out=0.1, use_grayscale=False).valid                   
             if self._template_finder.search_and_wait(["LAUGHING"], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False).valid:
                 laughcount += 1
                 if not self._pather.traverse_nodes([9000], self._char, time_out=3):
                     # do a random tele jump and try again
                     pos_m = self._screen.convert_abs_to_monitor((250, 220))
                     self._char.move(pos_m, force_move=True) 
-                self._char._kill_throne_trash()
-            if laughcount >= 4 and self._template_finder.search_and_wait(["LAUGHING"], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False) == False:
+                self._char._kill_throne_trash()   
+            if laughcount >= 4 and not self._template_finder.search_and_wait(["LAUGHING"], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False).valid:
                 if self._template_finder.search_and_wait(["LAUGHING"], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False).valid:
-                    break
-                Logger.debug("NOT LAUGHING GONNA MINI TRASH")
-                Logger.debug("BROKEN4")
+                    break 
                 corner_count = corner_count
                 self._pather.traverse_nodes([9000], self._char, time_out=3)
+                if self._template_finder.search_and_wait(["BAAL_THRONE_ROOM_CLEAR", "BAAL_THRONE_ROOM_CLEAR_1", "BAAL_THRONE_ROOM_CLEAR_2"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).valid:
+                    Logger.debug("NO BAALDUDE //// CLICKING EXIT")
+                    if not self._pather.traverse_nodes([9004], self._char, time_out=3):
+                        Logger.debug("I GOT LOST BOSS")
+                    if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.7, time_out=4):
+                        if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.7, time_out=4):
+                            return False
                 while corner_count > 4:
                     if self._template_finder.search_and_wait(["LAUGHING"], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False).valid:
                         break
@@ -531,95 +537,8 @@ class Baal:
                         self._char.move(pos_m, force_tp=True)
                         self._pather.traverse_nodes([9000], self._char, time_out=3)
                     corner_count += 1
-                    # Logger.debug("LAUGH COUNT OVER 4")
-                    # baaldude = False
-                    # if not self._pather.traverse_nodes([9000], self._char, time_out=3):
-                    #     # do a random tele jump and try again
-                    #     pos_m = self._screen.convert_abs_to_monitor((250, 220))
-                    #     self._char.move(pos_m, force_move=True)
-                    # found_loading_screen_func = lambda: self._ui_manager.wait_for_loading_screen(2.0)
-                    # if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.7, time_out=4):
-                    #     Logger.debug("BROKEN1")
-                    #     baaldude = self._template_finder.search_and_wait(["BAAL_HIMSELF", "BAAL_HIMSELF3"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False) or self._template_finder.search_and_wait(["BAAL_HIMSELF2"], best_match=True, threshold=0.6, time_out=0.1, use_grayscale=False)                   
-                    #     if baaldude == True:
-                    #         Logger.debug("FOUND BAALDUDE HOPEFULLY KILLING TRASH")
-                    #         laughcount += 1
-                    #         Logger.debug("FOUND BAAL KILLING MORE TRASH")                            
-                    #     elif baaldude == False:
-                    #         Logger.debug("BROKEN2")
-                    #         laughcount += 1
-                    #         Logger.debug("NO BAALDUDE")
-                    #         if not self._pather.traverse_nodes([9000, 9003], self._char, time_out=3):
-                    #             Logger.debug("I GOT LOST BOSS")
-                    #         if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.7, time_out=4):
-                    #             pos_m = self._screen.convert_abs_to_monitor((80, -100))
-                    #             self._char.move(pos_m, force_move=True)
-                    #             Logger.debug("DID A TELE")
-                    #             Logger.debug("MOVING MOUSE")
-                    #             pos_m = self._screen.convert_abs_to_monitor((0, 0)) #remove mouse from seal
-                    #             mouse.move(*pos_m, randomize=[90, 160])
-                    #             if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.7, time_out=4):
-                    #                 if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.7, time_out=4):
-                    #                     Logger.debug("NO EXIT PASSING????")
-                    #                     if self._template_finder.search_and_wait(["BAAL_CHAMBER_1", "BAAL_CHAMBER_2", "BAAL_CHAMBER_0" ], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False).valid:
-                    #                         Logger.debug("FOUND CHAMBER")
-            elif laughcount >= 4 and not self._template_finder.search_and_wait(["LAUGHING"], best_match=True, threshold=0.75, time_out=2, use_grayscale=False).valid and not self._template_finder.search_and_wait(["BAAL_HIMSELF", "BAAL_HIMSELF3"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).valid and not self._template_finder.search_and_wait(["BAAL_HIMSELF2"], best_match=True, threshold=0.6, time_out=0.1, use_grayscale=False).valid:
-                found_loading_screen_func = lambda: self._ui_manager.wait_for_loading_screen(2.0)                   
-                if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.7, time_out=4):
-                    baaldude = self._template_finder.search_and_wait(["BAAL_HIMSELF", "BAAL_HIMSELF3"], best_match=True, threshold=0.6, time_out=0.1, use_grayscale=False).valid or self._template_finder.search_and_wait(["BAAL_HIMSELF2"], best_match=True, threshold=0.6, time_out=0.1, use_grayscale=False).valid                   
-                    if baaldude == False:
-                        Logger.debug("NO BAAL GONNA TRY TO CLICK")                         
-                        if not self._pather.traverse_nodes([9000], self._char, time_out=3):
-                            Logger.debug("I GOT LOST BOSS")
-                        if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.5, time_out=4):
-                            pos_m = self._screen.convert_abs_to_monitor((150, -150))
-                            self._char.move(pos_m, force_move=True)
-                            Logger.debug("DID A TELE")
-                            if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.5, time_out=4):
-                                pos_m = self._screen.convert_abs_to_monitor((50, -80))
-                                self._char.move(pos_m, force_move=True)
-                                if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.5, time_out=4):
-                                    Logger.debug("NO EXIT PASSING????")
-                                    if self._template_finder.search_and_wait(["BAAL_CHAMBER_1", "BAAL_CHAMBER_2", "BAAL_CHAMBER_0"], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False).valid:
-                                        Logger.debug("FOUND CHAMBER")
-                                        break
-               
-                # baaldude = self._template_finder.search_and_wait(["BAAL_HIMSELF"], best_match=True, threshold=0.6, time_out=0.1, use_grayscale=False).valid or self._template_finder.search_and_wait(["BAAL_HIMSELF2"], best_match=True, threshold=0.6, time_out=0.1, use_grayscale=False).valid
-                # if baaldude == False:
-                #     if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.7, time_out=4):
-                #         pos_m = self._screen.convert_abs_to_monitor((250, -200))
-                #         self._char.move(pos_m, force_move=True)
-                #         mouse.move(0, 0)
-                #         Logger.debug("MAYBE MORE SPAWNS!!")
-                #         if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.7, time_out=4):
-                #             Logger.debug("KILL SOME MORE TRASH!")                      
-                #             if baaldude:
-                #                 baaldude = self._template_finder.search_and_wait(["BAAL_HIMSELF"], best_match=True, threshold=0.6, time_out=0.1, use_grayscale=False).valid or self._template_finder.search_and_wait(["BAAL_HIMSELF2"], best_match=True, threshold=0.6, time_out=0.1, use_grayscale=False).valid
-                #                 if self._template_finder.search_and_wait(["LAUGHING"], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False).valid:
-                #                     self._char._kill_throne_trash() 
-                #                 else:
-                #                     self._char.kill_baal() 
-                #                     Logger.debug("KILLING BAAL IN FUNCTION")
+ 
 
-        #         self._char._kill_throne_trash()
-        # while baaldude:
-        #     baaldude = self._template_finder.search_and_wait(["BAAL_HIMSELF"], best_match=True, threshold=0.6, time_out=0.1, use_grayscale=False).valid or self._template_finder.search_and_wait(["BAAL_HIMSELF"], best_match=True, threshold=0.9, time_out=0.1, use_grayscale=False).valid
-        #     if self._template_finder.search_and_wait(["LAUGHING"], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False).valid:
-        #         self._char._kill_throne_trash() 
-        #     else:
-        #          Logger.debug("Uh.. WAITING FOR LAUGH")
-
-
-        # Logger.debug("HITTING TELE KEY AND TRYING TO GET TO CHAMBER")                   
-        # keyboard.send(self._char._skill_hotkeys["teleport"]) #switch active skill to teleport
-        # found_loading_screen_func = lambda: self._ui_manager.wait_for_loading_screen(2.0)
-        # if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.7, time_out=4):
-        #     pos_m = self._screen.convert_abs_to_monitor((250, -200))
-        #     self._char.move(pos_m, force_move=True)
-        #     Logger.debug("CANT GET TO EXIT")
-        #     if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.7, time_out=4):
-        #         Logger.debug("ABANDON HOPE!!!")
-        #         return False
 
                     
     

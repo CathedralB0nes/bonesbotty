@@ -346,10 +346,12 @@ class Pather:
             
             #THRONE ROOM
             9000: {"BAAL_THRONE_ROOM_6": (-236, 2), "BAAL_THRONE_ROOM_5": (344, 154), "BAAL_THRONE_ROOM_0": (-123, 430), "BAAL_THRONE_ROOM_1": (-461, 346), "BAAL_THRONE_ROOM_3": (-570, 142), "BAAL_THRONE_ROOM_4": (627, -1), "BAAL_THRONE_ROOM_2": (-608, 230), },
-            9003: {"BAAL_THRONE_ROOM_6": (-236, 2), "BAAL_THRONE_ROOM_4": (627, -1), "BAAL_THRONE_ROOM_5": (344, 154), "BAAL_THRONE_ROOM_3": (-570, 142), "BAAL_THRONE_ROOM_0": (-123, 430)},
+            9004: {"BAAL_THRONE_ROOM_CLEAR_2": (25, 40), }, #CLICKY BOY
+            # makeshift stairs tele 9003: {"BAAL_THRONE_ROOM_6": (-236, 2), "BAAL_THRONE_ROOM_4": (627, -1), "BAAL_THRONE_ROOM_5": (344, 154), "BAAL_THRONE_ROOM_3": (-570, 142), "BAAL_THRONE_ROOM_0": (-123, 430)},
             # CHAMBER
             9001: {"BAAL_CHAMBER_5": (107, -45), "BAAL_CHAMBER_0": (-131, 24), "BAAL_CHAMBER_1": (-138, 5), "BAAL_CHAMBER_2": (-378, -162), "BAAL_CHAMBER_3": (372, 188), },
             9002: {"BAAL_CHAMBER_3": (-236, 280), "BAAL_CHAMBER_5": (-501, 47), "BAAL_CHAMBER_4": (529, -44), "BAAL_CHAMBER_0": (-739, 117), "BAAL_CHAMBER_1": (-746, 97), "BAAL_CHAMBER_2": (-987, -69), },
+            
     
 
 
@@ -720,7 +722,7 @@ if __name__ == "__main__":
     t_finder = TemplateFinder(screen)
     pather = Pather(screen, t_finder)
 
-    display_all_nodes(pather, "BAAL_")
+    display_all_nodes(pather, "BAAL_THRONE_ROOM")
 
     # # changing node pos and generating new code
     # code = ""
