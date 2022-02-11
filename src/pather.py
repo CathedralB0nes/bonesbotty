@@ -346,7 +346,7 @@ class Pather:
             
             #THRONE ROOM
             9000: {"BAAL_THRONE_ROOM_6": (-236, 2), "BAAL_THRONE_ROOM_5": (344, 154), "BAAL_THRONE_ROOM_0": (-123, 430), "BAAL_THRONE_ROOM_1": (-461, 346), "BAAL_THRONE_ROOM_3": (-570, 142), "BAAL_THRONE_ROOM_4": (627, -1), "BAAL_THRONE_ROOM_2": (-608, 230), },
-            9004: {"BAAL_THRONE_ROOM_CLEAR_2": (25, 40), }, #CLICKY BOY
+            9004: {'BAAL_CLICK_1': (-373, -22), 'BAAL_CLICK_3': (565, -27), 'BAAL_CLICK_4': (270, 110), 'BAAL_CLICK_5': (-24, -145), 'BAAL_CLICK_7': (-250, 83), 'BAAL_CLICK_0': (83, 194), 'BAAL_CLICK_6': (-194, 165)},
             # makeshift stairs tele 9003: {"BAAL_THRONE_ROOM_6": (-236, 2), "BAAL_THRONE_ROOM_4": (627, -1), "BAAL_THRONE_ROOM_5": (344, 154), "BAAL_THRONE_ROOM_3": (-570, 142), "BAAL_THRONE_ROOM_0": (-123, 430)},
             # CHAMBER
             9001: {"BAAL_CHAMBER_5": (107, -45), "BAAL_CHAMBER_0": (-131, 24), "BAAL_CHAMBER_1": (-138, 5), "BAAL_CHAMBER_2": (-378, -162), "BAAL_CHAMBER_3": (372, 188), },

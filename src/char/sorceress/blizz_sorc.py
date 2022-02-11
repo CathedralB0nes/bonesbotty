@@ -787,7 +787,7 @@ class BlizzSorc(Sorceress):
         self._ice_blast((35, 35), spray=90)
         self._blizzard((-60, 0), spray=90)
         self._blizzard((60, 0), spray=90)
-        self._cast_static()
+        self._ice_blast((35, 35), spray=90)
         return True
 
 
