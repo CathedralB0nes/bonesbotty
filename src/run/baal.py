@@ -381,7 +381,7 @@ class Baal:
             _, mask = cv2.threshold(diff, 13, 255, cv2.THRESH_BINARY)
             score = (float(np.sum(mask)) / mask.size) * (1/255.0)
             Logger.debug(str(score) + ": is our current score")
-            if self._template_finder.search_and_wait(["BAAL_LVL2_4", "BAAL_LVL2_5", "BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], best_match=True, threshold=0.7,  time_out=0.1, use_grayscale=False).valid:
+            if self._template_finder.search_and_wait(["BAAL_LVL2_4", "BAAL_LVL2_5", "BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], best_match=True, threshold=0.8,  time_out=0.1, use_grayscale=False).valid:
                 pos_m = (0, 0)
                 self._exitclicker(pos_m)
             if score < .10:
@@ -421,7 +421,7 @@ class Baal:
                 founder = self._template_finder.search_and_wait(["RED_GOOP_PURPLE3", "RED_GOOP_PURPLE4", "RED_GOOP_PURPLE6"], best_match=True, threshold=0.9,  time_out=0.1, use_grayscale=False)
                 if founder.valid:
                     pos_m = self._screen.convert_screen_to_monitor(founder.position)                
-                roomfound = self._template_finder.search_and_wait(["BAAL_LVL2_4", "BAAL_LVL2_5", "BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], best_match=True, threshold=0.7,  time_out=0.1, use_grayscale=False).valid
+                roomfound = self._template_finder.search_and_wait(["BAAL_LVL2_4", "BAAL_LVL2_5", "BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], best_match=True, threshold=0.8,  time_out=0.1, use_grayscale=False).valid
                 template_match = self._template_finder.search_and_wait(["RED_GOOP_PURPLE3", "RED_GOOP_PURPLE4", "RED_GOOP_PURPLE6", "RED_GOOP_PURPLE5"], best_match=True, threshold=0.9,  time_out=0.1, use_grayscale=False)
                 if roomfound == True or template_match.valid:
                     if self._template_finder.search_and_wait(["MAP_CHECK"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).valid:
@@ -455,18 +455,18 @@ class Baal:
                         stuck_count = 0
             Logger.debug("FOUND EXIT")
             found_loading_screen_func = lambda: self._ui_manager.wait_for_loading_screen(2.0)
-            if not self._char.select_by_template(["BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], found_loading_screen_func, threshold=0.7, time_out=4):
+            if not self._char.select_by_template(["BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], found_loading_screen_func, threshold=0.8, time_out=4):
                 # do a random tele jump and try again
                 Logger.debug("FOUND EXIT BUT BROKE")
                 pos_m = self._screen.convert_abs_to_monitor((315, -150))
                 self._char.move(pos_m, force_move=True)
-                if not self._char.select_by_template(["BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], found_loading_screen_func, threshold=0.7, time_out=4):
+                if not self._char.select_by_template(["BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], found_loading_screen_func, threshold=0.8, time_out=4):
                     self._char.move(pos_m, force_move=True)
-                    if not self._char.select_by_template(["BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], found_loading_screen_func, threshold=0.7, time_out=4):
+                    if not self._char.select_by_template(["BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], found_loading_screen_func, threshold=0.8, time_out=4):
                         pos_m = self._screen.convert_abs_to_monitor((-315, -100))
                         self._char.move(pos_m, force_move=True)
                         Logger.debug("CANT GET TO EXIT")
-                        if not self._char.select_by_template(["BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], found_loading_screen_func, threshold=0.7, time_out=4):
+                        if not self._char.select_by_template(["BAAL_LVL2_EXIT", "BAALER2_0", "BAALER2_1"], found_loading_screen_func, threshold=0.8, time_out=4):
                             Logger.debug("ABANDON HOPE!!!")
                             return False
             if self._template_finder.search_and_wait(["BAAL_THRONE_START_0", "BAAL_THRONE_START_1", "BAAL_THRONE_START_2", "BAAL_THRONE_START_3"], threshold=0.8, time_out=.5).valid:
@@ -506,7 +506,7 @@ class Baal:
 
 
 
-        Logger.debug("MINI TRASH")
+        Logger.debug("CLEAR TRASH IN THRONE")
         corner_count = 0
         while not self._template_finder.search_and_wait(["LAUGHING"], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False).valid:
             if self._template_finder.search_and_wait(["LAUGHING"], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False).valid:
@@ -558,8 +558,7 @@ class Baal:
         found_loading_screen_func = lambda: self._ui_manager.wait_for_loading_screen(2.0)
         laughcount = 0
         while not self._template_finder.search_and_wait(["BAAL_THRONE_ROOM_CLEAR", "BAAL_THRONE_ROOM_CLEAR_1", "BAAL_THRONE_ROOM_CLEAR_2"], best_match=True, threshold=0.7, time_out=0.1, use_grayscale=False).valid or self._template_finder.search_and_wait(["BAAL_THRONE_ROOM_7"], best_match=True, threshold=0.9, time_out=0.1, use_grayscale=False).valid:
-            Logger.debug("LAUGH COUNT :")
-            Logger.debug(laughcount)
+            Logger.debug("LAUGH COUNT :" + str(laughcount))            
             if self._template_finder.search_and_wait(["LAUGHING"], best_match=True, threshold=0.75, time_out=0.1, use_grayscale=False).valid:                
                 if not self._pather.traverse_nodes([9000], self._char, time_out=3):
                     # do a random tele jump and try again
@@ -612,9 +611,10 @@ class Baal:
                         self._pather.traverse_nodes([9000], self._char, time_out=3)
                         corner_count += 1
         self._pather.traverse_nodes([9000], self._char, time_out=3)
-        if self._template_finder.search_and_wait(["BAAL_THRONE_ROOM_CLEAR", "BAAL_THRONE_ROOM_CLEAR_1", "BAAL_THRONE_ROOM_CLEAR_2"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).valid or self._template_finder.search_and_wait(["BAAL_THRONE_ROOM_7"], best_match=True, threshold=0.9, time_out=0.1, use_grayscale=False).valid:
-            Logger.debug("NO BAALDUDE //// CLICKING EXIT")
+        if self._template_finder.search_and_wait(["BAAL_THRONE_ROOM_CLEAR", "BAAL_THRONE_ROOM_CLEAR_1", "BAAL_THRONE_ROOM_CLEAR_2"], best_match=True, threshold=0.5, time_out=0.1, use_grayscale=False).valid:
             self._picked_up_items |= self._pickit.pick_up_items(self._char)
+            if not self._pather.traverse_nodes([9000], self._char, time_out=3):
+                Logger.debug("I GOT LOST BOSS")
             if not self._pather.traverse_nodes([9004], self._char, time_out=3):
                 Logger.debug("I GOT LOST BOSS")
             if not self._char.select_by_template(["BAAL_THRONE_ROOM_7"], found_loading_screen_func, threshold=0.5, time_out=4):
