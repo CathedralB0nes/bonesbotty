@@ -1,3 +1,4 @@
+from asyncio import run_coroutine_threadsafe
 from transitions import Machine
 import time
 import keyboard
@@ -50,7 +51,7 @@ class Bot:
         self._ui_manager = UiManager(self._screen, self._template_finder, self._game_stats)
         self._belt_manager = BeltManager(self._screen, self._template_finder)
         self._pather = Pather(self._screen, self._template_finder)
-        self._pickit = PickIt(self._screen, self._item_finder, self._ui_manager, self._belt_manager)
+        self._pickit = PickIt(self._screen, self._item_finder, self._ui_manager, self._belt_manager)       
 
         # Create Character
         if self._config.char["type"] in ["sorceress", "light_sorc"]:
@@ -203,7 +204,7 @@ class Bot:
                 break
         return not found_unfinished_run
 
-    def on_create_game(self):
+    def on_create_game(self):             
         keyboard.release(self._config.char["stand_still"])
         # Start a game from hero selection
         self._game_stats.log_start_game()
@@ -324,11 +325,15 @@ class Bot:
         self._curr_loc = False
         self._pre_buffed = False
         self._ui_manager.save_and_exit()
-        self._game_stats.log_end_game(failed=failed)
+        game_count = self._game_stats._game_counter
         self._do_runs = copy(self._do_runs_reset)
         if self._config.general["randomize_runs"]:
             self.shuffle_runs()
-        wait(0.2, 0.5)
+        if self._config.char["take_break"] and game_count > 1:
+            breaker = self._config.char["take_break_time"]
+            Logger.info("BREAK TIME!")
+            wait(breaker)
+        wait(0.2, 0.5)           
         self.trigger_or_stop("create_game")
 
     def on_end_run(self):
