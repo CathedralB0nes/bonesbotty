@@ -130,6 +130,7 @@ class Bot:
         self._current_threads = []
         self._no_stash_counter = 0
         self._ran_no_pickup = False
+        self._take_break = 0
 
         # Create State Machine
         self._states=['hero_selection', 'town', 'pindle', 'shenk', 'trav', 'nihlatak', 'arcane', 'diablo', 'meph', 'baal']
@@ -319,20 +320,23 @@ class Bot:
         if not started_run:
             self.trigger_or_stop("end_game")
 
-    def on_end_game(self, failed: bool = False):
+    def on_end_game(self, failed: bool = False):              
+        self._take_break += 1
         if self._config.general["info_screenshots"] and failed:
             cv2.imwrite("./info_screenshots/info_failed_game_" + time.strftime("%Y%m%d_%H%M%S") + ".png", self._screen.grab())
         self._curr_loc = False
         self._pre_buffed = False
         self._ui_manager.save_and_exit()
-        game_count = self._game_stats._game_counter
+        self._game_stats.log_end_game(failed=failed)           
         self._do_runs = copy(self._do_runs_reset)
         if self._config.general["randomize_runs"]:
             self.shuffle_runs()
-        if self._config.char["take_break"] and game_count > 1:
-            breaker = self._config.char["take_break_time"]
-            Logger.info("BREAK TIME!")
-            wait(breaker)
+        if type(self._config.char["take_break"]) == int and self._config.char["take_break"] > 0:
+            if self._take_break == self._config.char["take_break"]:
+                breaker = self._config.char["take_break_time"]
+                Logger.debug("Games Without Breaking: " + str(self._take_break) + " Break Count Reached. Taking a breather:")
+                self._take_break = 0            
+                wait(breaker)
         wait(0.2, 0.5)           
         self.trigger_or_stop("create_game")
 

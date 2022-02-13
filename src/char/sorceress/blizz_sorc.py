@@ -761,6 +761,8 @@ class BlizzSorc(Sorceress):
         return True
         
     def _kill_throne_trash(self) -> bool:
+        pos_m = self._screen.convert_abs_to_monitor((0, 0))
+        self.pre_move()
         self._cast_static()
         self._blizzard((35, -35), spray=10)
         self._ice_blast((35, -35), spray=30)

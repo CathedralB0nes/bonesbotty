@@ -34,8 +34,42 @@
                     Logger.debug("MINI BOT LEFT")
                     self._pather.traverse_nodes_fixed("baal_minitrash_blefts", self._char)          
                     self._char._mini_trash()
-                    self._pather.traverse_nodes_fixed("baal_minitrash_blefte", self._char))
+                    self._pather.traverse_nodes_fixed("baal_minitrash_blefte", self._char)
                     self._pather.traverse_nodes([9000], self._char, time_out=3)
                     corner_count += 1
                 elif corner_count == 4:
                     break
+
+
+
+    def take_break(self, failed: bool = False):
+        if self._config.general["info_screenshots"] and failed:
+            cv2.imwrite("./info_screenshots/info_failed_game_" + time.strftime("%Y%m%d_%H%M%S") + ".png", self._screen.grab())
+        self._curr_loc = False
+        self._pre_buffed = False
+        self._ui_manager.save_and_exit()
+        game_count = self._game_stats._game_counter
+        self._do_runs = copy(self._do_runs_reset)
+        if self._config.general["randomize_runs"]:
+            self.shuffle_runs()
+        if game_count > 1:            
+            Logger.info("BREAK TIME!")
+            wait("""TIME YOU WANNA WAIT IN SECONDS!""")
+        wait(0.2, 0.5)           
+        self.trigger_or_stop("create_game"
+
+
+
+
+
+
+               new_counter = self._game_stats._game_counter
+        mini_counter = new_counter - 1
+        holder = new_counter - new_counter
+        Logger.debug("HOLDER FIRST:" + str(holder))
+        game_count = self._game_stats._game_counter
+        Logger.debug("GAMECOUNT FIRST AND NEW:" + str(game_count))       
+        holder = game_count - holder
+        Logger.debug("HOLDER = COUNT - HOLDER:" + str(holder))        
+        Logger.debug("GAMECOUNT" + str(game_count))
+        Logger.debug("GAMECOUNT" + str(holder))  
